@@ -1,0 +1,55 @@
+<html>
+    <style>
+        h1 {
+          font-size: 36px;
+          margin-top: 50px;
+          margin-bottom: 30px;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+        }
+        
+        form {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-top: 20px;
+        }
+        
+        label {
+          margin-bottom: 10px;
+        }
+        
+        input[type="text"] {
+          width: 300px;
+          padding: 10px;
+          margin-bottom: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        input[type="submit"] {
+          background-color: #4CAF50;
+          color: white;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+        
+        input[type="submit"]:hover {
+          background-color: #3e8e41;
+        }
+      </style>    
+    <body>
+        <h1>
+            This is the Twitter dataset search application for team 8.
+        </h1>
+
+        <form>
+            <label for="input-field">Enter username, hashtag or part of a string:</label><br>
+            <input type="text" id="input-field" name="input-field"><br>
+            <input type="submit" value="Submit">
+          </form>
+    </body>
+</html>
