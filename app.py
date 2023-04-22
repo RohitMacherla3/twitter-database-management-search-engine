@@ -1,5 +1,159 @@
+# Import Libraries
 from flask import Flask, redirect, url_for, render_template, request
+import pymongo
+import json
+import time
+from datetime import datetime
+import mysql.connector as cnx
+import pickle
 
+
+# connect to mysql server
+mydb = cnx.connect(
+  host="localhost",
+  user="root",
+  password="Anirudh13",
+  database="mydatabase"
+)
+
+mycursor = mydb.cursor(buffered=True)
+
+#connect to mongodb
+client = pymongo.MongoClient("mongodb://localhost:27017/") 
+db = client["Tweets_DB"]
+tweets_collec = db["Tweets_data"]
+
+
+class Cache:
+    def __init__(self, max_size=1000, evict_strategy='least_accessed', checkpoint_interval=3600, ttl=None):
+        self.max_size = max_size
+        self.evict_strategy = evict_strategy
+        self.checkpoint_interval = checkpoint_interval
+        self.ttl = ttl
+        self.cache = {}
+        self.access_count = {}
+        self.last_checkpoint = time.time()
+
+    def load_from_checkpoint(self, checkpoint_file):
+        with open(checkpoint_file, 'rb') as f:
+            self.cache, self.access_count = pickle.load(f)
+
+    def save_to_checkpoint(self, checkpoint_file):
+        with open(checkpoint_file, 'wb') as f:
+            pickle.dump((self.cache, self.access_count), f)
+            
+    def get(self, key):
+        
+        if key[0].isdigit() or key.startswith('#'):
+            if key not in self.cache:
+                return None
+            similar_keys = [key]
+            
+        else:
+            similar_keys = []
+            for k in self.cache:
+                if key in k:
+                    similar_keys.append(k)
+
+            if len(similar_keys) == 0:
+                return None
+        
+        if self.ttl is not None and (time.time() - self.cache[key]['timestamp']) > self.ttl:
+            del self.cache[key]
+            del self.access_count[key]
+            return None
+        
+        for i in similar_keys:
+            self.access_count[i] += 1
+            
+            if self.evict_strategy == 'least_accessed':
+                least_accessed_key = min(self.access_count, key=self.access_count.get)
+                if len(self.cache) > self.max_size and key != least_accessed_key:
+                    del self.cache[least_accessed_key]
+                    del self.access_count[least_accessed_key]
+                
+        return [self.cache[k]['value'] for k in similar_keys]
+
+    def put(self, key, value):
+        if not key.startswith('#'):
+            key = key.lower()
+        self.cache[key] = {'value': value, 'timestamp': time.time()}
+        self.access_count[key] = 0
+        if len(self.cache) > self.max_size:
+            if self.evict_strategy == 'least_accessed':
+                least_accessed_key = min(self.access_count, key=self.access_count.get)
+                del self.cache[least_accessed_key]
+                del self.access_count[least_accessed_key]
+            elif self.evict_strategy == 'oldest':
+                oldest_key = min(self.cache, key=lambda k: self.cache[k]['timestamp'])
+                del self.cache[oldest_key]
+                del self.access_count[oldest_key]
+        if (time.time() - self.last_checkpoint) > self.checkpoint_interval:
+            self.save_to_checkpoint('cache.checkpoint')
+            self.last_checkpoint = time.time()
+            
+    def print_cache(self):
+        print('Cache:')
+        for key, value in self.cache.items():
+            print(f"{key}: {value['value']}")
+        used_space = len(self.cache)
+        remaining_space = self.max_size - used_space
+        print(f"Cache size: {used_space}")
+        print(f"Remaining space: {remaining_space}")
+
+
+cache = Cache()
+
+# check if the search term starts with '@'
+def UserSearch(search_term):
+    
+    if search_term.startswith('@'):
+    # remove the '@' symbol from the search term
+        search_term = search_term[1:]
+        
+        if cache.get(search_term):
+            results = cache.get(search_term)
+            
+        else:
+            # execute the query to search for user details based on username
+            query = """
+                SELECT * FROM users 
+                WHERE name LIKE %s 
+                ORDER BY followers_count DESC, tweets_count DESC, verified DESC
+                LIMIT 5
+                """
+            mycursor.execute(query, ('%' + search_term + '%',))
+            results = mycursor.fetchall()
+            for i in range(0,len(results)):
+                cache.put(results[i][1], results[i])
+
+        return results
+    
+
+def get_user_tweets(user_id):
+    
+    if cache.get(user_id):
+        tweet_details = cache.get(user_id)
+    
+    else:
+        
+        user_tweets = list(tweets_collec.find({'User_Id': user_id}).sort([('created_at', -1)]).limit(3))
+        tweet_details = []
+        
+        for tweet in user_tweets:
+            tweet_details.append({
+                'created_at': tweet['created_at'],
+                'text': tweet['Text'],
+                'hashtags': tweet['Hashtag'],
+                'retweet_count': tweet['Retweet_Count'],
+                'likes_count': tweet['Likes_Count']
+            })
+        
+        cache.put(user_id, tweet_details)
+    return tweet_details
+
+
+tweets_cache={}
 app= Flask(__name__)
 
 @app.route('/')
@@ -9,15 +163,25 @@ def welcome():
 @app.route('/submit', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        input_text = request.form['input-field']
-        if input_text.startswith('@'):
-            return redirect(url_for('username', username=input_text))
-        elif input_text.startswith('#'):
-            return redirect(url_for('hashtag', hashtag=input_text))
+        global results
+        search_term= request.form['input-field']
+        results=UserSearch(search_term)
+        for result in results[:5]:
+            user_id = result[0]
+            tweets_cache[user_id] = get_user_tweets(user_id)
+        return render_template('username.html', username=search_term, userinfo=results[:5])
+    
+@app.route('/submit2', methods=['GET', 'POST'])
+def user_result():
+    if request.method == 'POST':
+        user_choice= int(request.form['input-field'])
+        user_id = results[user_choice-1][0]
+        if user_id in tweets_cache:
+            tweet=tweets_cache[user_id]
         else:
-            # do something else if not username or hashtag
-            pass
-    return render_template('index.html')
+            tweet=['1','2','3']
+        user_id=results[user_choice-1][1]
+        return render_template('username_tweets.html',username=user_id,tweets=tweet)
 
 @app.route('/username/<username>')
 def username(username):

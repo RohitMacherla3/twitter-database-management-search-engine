@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>User Tweets</title>
+	<style>
+		table {
+			border-collapse: collapse;
+			margin: 20px;
+			width: 90%;
+			max-width: 1200px;
+		}
+		th, td {
+			border: 1px solid #ddd;
+			padding: 8px;
+			text-align: left;
+		}
+		tr:nth-child(even) {
+			background-color: #f2f2f2;
+		}
+		h1 {
+			margin-left: 20px;
+		}
+		.username {
+			margin-left: 20px;
+			margin-top: 20px;
+			font-size: 24px;
+			font-weight: bold;
+		}
+	</style>
+</head>
+<body>
+	<h1>User Tweets</h1>
+	<p class="username">User: {{ username }}</p>
+	<table>
+		<thead>
+			<tr>
+				<th>#</th>
+                <th>Date</th>
+				<th>Text</th>
+				<th>Hashtags</th>
+				<th>Retweets</th>
+				<th>Likes</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for tweet in tweets %}
+				<tr>
+					<td>{{ loop.index }}</td>
+					<td>{{ tweet['created_at'] }}</td>
+					<td>{{ tweet['text'] }}</td>
+					<td>{% if tweet['hashtags'] %}{{ tweet['hashtags'] }}{% else %}-{% endif %}</td>
+					<td>{{ tweet['retweet_count'] }}</td>
+					<td>{{ tweet['likes_count'] }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</body>
+</html>
+
+
+
+
+

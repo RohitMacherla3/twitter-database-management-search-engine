@@ -1,10 +1,89 @@
 <html>
 <head>
-  <title>Twitter Search Results</title>
-  <style>
-  </style>
+	<title>User Search Results</title>
+	<style>
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+		th, td {
+			padding: 8px;
+			text-align: left;
+			border-bottom: 1px solid #ddd;
+		}
+		th {
+			background-color: #f2f2f2;
+		}
+		td.description {
+			max-width: 370px;
+			word-wrap: break-word;
+		}
+
+    form {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-top: 20px;
+        }
+
+      input[type="text"] {
+          width: 300px;
+          padding: 10px;
+          margin-bottom: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="submit2"] {
+          background-color: #4CAF50;
+          color: white;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+        
+        input[type="submit2"]:hover {
+          background-color: #3e8e41;
+        }
+	</style>
 </head>
 <body>
-  <h1>You searched for a username: {{ username }}</h1>
+	<h1>User Search Results</h1>
+	<table>
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Name</th>
+				<th>Verified</th>
+				<th>Followers</th>
+				<th>Tweets</th>
+				<th>Description</th>
+				<th>Location</th>
+				<th>Creation Date</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for result in userinfo %}
+				<tr>
+					<td>{{ loop.index }}</td>
+					<td>{{ result[1] }}</td>
+					<td>{% if result[3] == 1 %}✅{% else %}❌{% endif %}</td>
+					<td>{{ result[4] }}</td>
+					<td>{{ result[8] }}</td>
+					<td class="description">{{ result[9] }}</td>
+					<td>{{ result[7] }}</td>
+					<td>{{ result[6] }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+  <form action="/submit2" method="post">
+    <p><label for="input-field">Enter the user number whose tweets you want to be displayed:</label><br></p>
+    <input type="text" id="input-field" name="input-field"><br>
+    <input type="submit" value="Submit">
+  </form>
 </body>
 </html>
+
