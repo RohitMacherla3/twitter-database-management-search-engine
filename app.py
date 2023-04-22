@@ -153,6 +153,36 @@ def get_user_tweets(user_id):
     return tweet_details
 
 
+def get_top_hashtags(search_string, limit=5):
+    
+    if search_string.startswith('#'):
+        search_string = search_string[1:]
+        
+        hashtags = tweets_collec.aggregate([
+        { "$match": { "Hashtag": { "$regex": search_string, "$options": "i" } } },
+        { "$unwind": "$Hashtag" },
+        { "$group": { "_id": "$Hashtag", "count": { "$sum": 1 } } },
+        { "$sort": { "count": -1 } },
+        { "$limit": limit }
+        ])
+        
+        hashtag_dict = {}
+        for hashtag in hashtags:
+            hashtag_dict[hashtag['_id']] = hashtag['count']
+            
+        return hashtag_dict
+
+
+def tweets_of_hashtag(hashtag):
+    
+    if cache.get('#' + hashtag):
+        tweets = cache.get(hashtag)[0]
+    else:
+        tweets = list(tweets_collec.find({'Hashtag': hashtag}).sort('created_at', -1).limit(3))
+        cache.put('#' + hashtag, tweets)
+    
+    return tweets
+
 tweets_cache={}
 app= Flask(__name__)
 
@@ -165,11 +195,20 @@ def index():
     if request.method == 'POST':
         global results
         search_term= request.form['input-field']
-        results=UserSearch(search_term)
-        for result in results[:5]:
-            user_id = result[0]
-            tweets_cache[user_id] = get_user_tweets(user_id)
-        return render_template('username.html', username=search_term, userinfo=results[:5])
+        if(search_term.startswith("@")):
+            results=UserSearch(search_term)
+            for result in results[:5]:
+                user_id = result[0]
+                tweets_cache[user_id] = get_user_tweets(user_id)
+            return render_template('username.html', username=search_term, userinfo=results[:5])
+        elif(search_term.startswith("#")):
+            hashtags = get_top_hashtags(search_term)
+            global temp_hashtag
+            temp_hashtag={}
+            for hashtag in hashtags.keys():
+                temp_hashtag[hashtag] = tweets_of_hashtag(hashtag)
+            
+            return render_template('hashtag.html', hashtag_name=search_term, hashtag_info=hashtags)
     
 @app.route('/submit2', methods=['GET', 'POST'])
 def user_result():
@@ -182,14 +221,13 @@ def user_result():
             tweet=['1','2','3']
         user_id=results[user_choice-1][1]
         return render_template('username_tweets.html',username=user_id,tweets=tweet)
+    
+@app.route('/submit3', methods=['GET', 'POST'])
+def hash_result():
+    if request.method == 'POST':
+        hashtag_select= str(request.form['input-field'])
+        return render_template('hashtag_tweets.html',hashtag_choice=hashtag_select,hash_cache=temp_hashtag)
 
-@app.route('/username/<username>')
-def username(username):
-    return render_template('username.html', username=username)
-
-@app.route('/hashtag/<hashtag>')
-def hashtag(hashtag):
-    return render_template('hashtag.html', hashtag=hashtag)
 
 
 
