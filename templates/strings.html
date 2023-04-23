@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tweets of a Hashtag</title>
+  <style>
+    h1 {
+      font-size: 36px;
+      margin-bottom: 30px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Tweets relevant to  "{{string_search}}"</h1>
+  {% if string_tweets %}
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Retweets</th>
+          <th>Likes</th>
+          <th>Created At</th>
+          <th>Text</th>
+          <th>Hashtags</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tweet in string_tweets %}
+          <tr>
+            <td>{{ tweet['User_Id'] }}</td>
+            <td>{{ tweet['Retweet_Count'] }}</td>
+            <td>{{ tweet['Likes_Count'] }}</td>
+            <td>{{ tweet['created_at'] }}</td>
+            <td>{{ tweet['Text'] }}</td>
+            <td>{{ tweet['Hashtag'] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No tweets found for the selected hashtag.</p>
+  {% endif %}
+</body>
+</html>

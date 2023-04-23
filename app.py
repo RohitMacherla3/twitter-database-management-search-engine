@@ -6,6 +6,7 @@ import time
 from datetime import datetime
 import mysql.connector as cnx
 import pickle
+from nltk.corpus import stopwords
 
 
 # connect to mysql server
@@ -183,6 +184,26 @@ def tweets_of_hashtag(hashtag):
     
     return tweets
 
+
+tweets_collec.create_index([("Text", "text")])
+
+def search_tweets(search_string):
+
+    stop_words = set(stopwords.words('english'))
+    search_words = search_string.split()
+    if len(set(search_words) - stop_words) == 0:
+        return "Error"
+    
+    search_string = '"' + search_string + '"'
+    # Search for tweets matching the search string
+    query = {'$text': {'$search': search_string}}
+    projection = {'_id': 0, 'Text': 1, 'ext': 1, 'created_at': 1, 'Retweet_Count': 1, 'favorite_count': 1, 'Hashtags': 1}
+    matching_tweets = list(tweets_collec.find(query).sort([('retweeted_status', 1), ('created_at', -1)]).limit(5))
+
+    return matching_tweets
+
+
+
 tweets_cache={}
 app= Flask(__name__)
 
@@ -209,6 +230,13 @@ def index():
                 temp_hashtag[hashtag] = tweets_of_hashtag(hashtag)
             
             return render_template('hashtag.html', hashtag_name=search_term, hashtag_info=hashtags)
+        
+        else:
+            string_match_tweets= search_tweets(search_term)
+            return render_template('strings.html', string_search=search_term, string_tweets=string_match_tweets)
+
+            
+            
     
 @app.route('/submit2', methods=['GET', 'POST'])
 def user_result():
