@@ -1,10 +1,81 @@
+
 <html>
 <head>
-  <title>Twitter Search Results</title>
+  <title>Hashtag Search Results</title>
   <style>
+    h1 {
+      font-size: 36px;
+      margin-bottom: 30px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    form {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-top: 20px;
+        }
+
+        input[type="text"] {
+          width: 300px;
+          padding: 10px;
+          margin-bottom: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        input[type="submit"] {
+          background-color: #4CAF50;
+          color: white;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+        
+        input[type="submit"]:hover {
+          background-color: #3e8e41;
+        }
   </style>
 </head>
 <body>
-  <h1>You searched for a hashtag: {{ hashtag }}</h1>
+  <h1>Top 5 Hashtags Matching Your Search for "{{ hashtag_name }}"</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Hashtag</th>
+        <th>Tweets Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for hashtag, count in hashtag_info.items() %}
+      <tr>
+        <td>{{ hashtag }}</td>
+        <td>{{ count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <form action="/submit3" method="post">
+    <p><label for="input-field">Enter the hashtag related to which the relevant tweets you want to be displayed:</label><br></p>
+    <input type="text" id="input-field" name="input-field"><br>
+    <input type="submit" value="Submit">
+  </form>
 </body>
 </html>
+
