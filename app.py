@@ -308,6 +308,7 @@ get_top_10_hashtags={'Corona': 5920,
   'COVID19': 1003,
   'coronavirus': 825,
   'AltaredellaPatria': 806,
+  'PideAlmayaDiyeÇıkıp': 777,
   'Liberazione': 700}
 
 get_top_10_tweets= [{'created_at': '2020-04-25 09:23:42',
@@ -443,11 +444,11 @@ def index():
 @app.route('/submit_top', methods=['GET', 'POST'])
 def top_10():
     if request.method == 'POST':
-        if request.form['action'] == 'Top 10 Users':
+        if request.form['action'] == 'Trending Users':
             return render_template('top_users.html',accounts=get_top_10_users)
-        elif request.form['action'] == 'Top 10 Tweets':
+        elif request.form['action'] == 'Trending Tweets':
             return render_template('top_tweets.html', string_tweets=get_top_10_tweets)
-        elif request.form['action'] == 'Top 10 Hashtags':
+        elif request.form['action'] == 'Trending Hashtags':
             return render_template('top_hashtags.html', hashtag_info=get_top_10_hashtags)
         else:
             message = ''

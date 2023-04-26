@@ -5,15 +5,18 @@
     h1 {
       font-size: 36px;
       margin-bottom: 30px;
+      text-align: center;
     }
 
     table {
       border-collapse: collapse;
+      margin: 0 auto;
+      max-width: 600px;
       width: 100%;
     }
 
     th, td {
-      text-align: left;
+      text-align: center;
       padding: 8px;
       border-bottom: 1px solid #ddd;
     }
@@ -23,37 +26,37 @@
     }
 
     form {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-top: 20px;
-        }
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
 
-        input[type="text"] {
-          width: 300px;
-          padding: 10px;
-          margin-bottom: 20px;
-          border: 1px solid #ccc;
-          border-radius: 5px;
-          box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-        }
-        
-        input[type="submit"] {
-          background-color: #4CAF50;
-          color: white;
-          padding: 10px 20px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-        }
-        
-        input[type="submit"]:hover {
-          background-color: #3e8e41;
-        }
+    input[type="text"] {
+      width: 300px;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #3e8e41;
+    }
   </style>
 </head>
 <body>
-  <h1>Top 10 Hashtags are: </h1>
+  <h1>Trending Hashtags</h1>
   <table>
     <thead>
       <tr>
