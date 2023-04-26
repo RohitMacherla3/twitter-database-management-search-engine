@@ -56,6 +56,7 @@
 			<tr>
 				<th>#</th>
 				<th>Name</th>
+				<th>Handle</th>
 				<th>Verified</th>
 				<th>Followers</th>
 				<th>Tweets</th>
@@ -69,6 +70,7 @@
 				<tr>
 					<td>{{ loop.index }}</td>
 					<td>{{ result[1] }}</td>
+					<td><a href="https://twitter.com/{{ result[2] }}" target="_blank">{{ result[2] }}</a></td>
 					<td>{% if result[3] == 1 %}✅{% else %}❌{% endif %}</td>
 					<td>{{ result[4] }}</td>
 					<td>{{ result[8] }}</td>
