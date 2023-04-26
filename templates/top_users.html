@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <title>Top 10 Twitter Accounts</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th, td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #2949ca;
+        color: white;
+      }
+
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Twitter Accounts</h1>
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Handle</th>
+        <th>Verified</th>
+        <th>Followers</th>
+        <th>Following</th>
+        <th>Location</th>
+        <th>Tweets</th>
+        <th>Bio</th>
+      </tr>
+      {% for account in accounts %}
+        <tr>
+          <td>{{ account[1] }}</td>
+          <td><a href="https://twitter.com/{{ account[2] }}" target="_blank">{{ account[2] }}</a></td>
+          <td>{% if account[3] == 1 %}Yes{% else %}No{% endif %}</td>
+          <td>{{ account[4] }}</td>
+          <td>{{ account[5] }}</td>
+          <td>{{ account[6] }}</td>
+          <td>{{ account[7] }}</td>
+          <td>{{ account[8] }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
