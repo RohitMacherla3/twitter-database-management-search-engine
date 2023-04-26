@@ -6,6 +6,8 @@
       margin-bottom: 30px;
       text-transform: uppercase;
       letter-spacing: 2px;
+      text-align: center;
+      font-family: "Helvetica Neue", sans-serif;
     }
 
     form {
@@ -17,6 +19,7 @@
 
     label {
       margin-bottom: 10px;
+      font-size: 24px; /* added larger font size */
     }
 
     input[type="text"] {
@@ -29,7 +32,7 @@
     }
 
     input[type="submit"] {
-      background-color: #4CAF50;
+      background-color: #1DA1F2;
       color: white;
       padding: 10px 20px;
       border: none;
@@ -39,22 +42,35 @@
     }
 
     input[type="submit"]:hover {
-      background-color: #3e8e41;
+      background-color: #1DA1F2;
+    }
+
+    .top-buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .top-buttons input[type="submit"] {
+      margin: 0 10px;
     }
   </style>
   <body>
-    <h1>This is the Twitter dataset search application for team 8.</h1>
+    <h1>Twitter Search Application : Team 8</h1>
 
+    <form action="/submit_top" method="post">
+      <div class="top-buttons">
+        <input type="submit" value="Trending Users" name="action" style="background-color: #ab3844;">
+        <input type="submit" value="Trending Tweets" name="action" style="background-color: #ab3844;">
+        <input type="submit" value="Trending Hashtags" name="action" style="background-color: #ab3844;">
+      </div>
+    </form>
     <form action="/submit" method="post">
       <label for="input-field">Enter username, hashtag or part of a string:</label><br>
       <input type="text" id="input-field" name="input-field"><br>
       <input type="submit" value="Submit">
     </form>
-
-    <form method="post" action="/submit_top">
-      <input type="submit" value="Top 10 Users" name="action" style="background-color: #007bff;">
-      <input type="submit" value="Top 10 Tweets" name="action" style="background-color: #007bff;">
-      <input type="submit" value="Top 10 Hashtags" name="action" style="background-color: #007bff;">
-    </form>
   </body>
 </html>
+
+
