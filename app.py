@@ -208,204 +208,43 @@ def search_tweets(search_string):
     return matching_tweets
 
 
+# Top 10 hashtags with are present in most tweets
+def get_top_10_hashtags(limit=10):
+    pipeline = [
+        {"$unwind": "$Hashtag"},
+        {"$group": {"_id": "$Hashtag", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": limit}
+    ]
+    top_hashtags = list(tweets_collec.aggregate(pipeline))
+    top_hashtags_dict = {}
+    for hashtag in top_hashtags:
+        top_hashtags_dict[hashtag['_id']] = hashtag['count']
+    return top_hashtags_dict
 
-get_top_10_users= [('813286',
-   'Barack Obama',
-   'BarackObama',
-   1,
-   116518121,
-   607194,
-   'Washington, DC',
-   1,
-   'Dad, husband, President, citizen.'),
-  ('25073877',
-   'Donald J. Trump',
-   'realDonaldTrump',
-   1,
-   78467254,
-   46,
-   'Washington, DC',
-   0,
-   '45th President of the United States of America🇺🇸'),
-  ('428333',
-   'CNN Breaking News',
-   'cnnbrk',
-   1,
-   57529057,
-   120,
-   'Everywhere',
-   0,
-   'Breaking news from CNN Digital. Now 56M strong. Check @cnn for all things CNN, breaking and more. Download the app for custom alerts: http://cnn.com/apps'),
-  ('18839785',
-   'Narendra Modi',
-   'narendramodi',
-   1,
-   55781248,
-   2364,
-   'India',
-   6,
-   'Prime Minister of India'),
-  ('44409004',
-   'Shakira',
-   'shakira',
-   1,
-   52250613,
-   212,
-   'Barranquilla',
-   0,
-   '🎙ME GUSTA Shakira & Anuel AA Nuevo Sencillo / New Single'),
-  ('759251',
-   'CNN',
-   'CNN',
-   1,
-   47567385,
-   1106,
-   None,
-   0,
-   'It’s our job to #GoThere & tell the most difficult stories. Join us! For more breaking news updates follow @CNNBRK  & Download our app http://cnn.com/apps'),
-  ('807095',
-   'The New York Times',
-   'nytimes',
-   1,
-   46359985,
-   904,
-   'New York City',
-   1,
-   'News tips? Share them here: http://nyti.ms/2FVHq9v'),
-  ('5402612',
-   'BBC Breaking News',
-   'BBCBreaking',
-   1,
-   43014510,
-   3,
-   'London, UK',
-   0,
-   'Breaking news alerts and updates from the BBC. For news, features, analysis follow @BBCWorld (international) or @BBCNews (UK). Latest sport news @BBCSport.'),
-  ('145125358',
-   'Amitabh Bachchan',
-   'SrBachchan',
-   1,
-   41596464,
-   1833,
-   'Mumbai, India',
-   1,
-   '"तुमने हमें पूज पूज कर पत्थर कर डाला ; वे जो हमपर जुमले कसते हैं हमें ज़िंदा तो समझते हैं "~  हरिवंश राय  बच्चन'),
-  ('132385468',
-   'Salman Khan',
-   'BeingSalmanKhan',
-   1,
-   40094611,
-   26,
-   'MUMBAI',
-   0,
-   'Film actor, artist, painter, humanitarian')]
+top_10_hash= get_top_10_hashtags()
 
-get_top_10_hashtags={'Corona': 5920,
-  'corona': 1928,
-  'Mattarella': 1516,
-  '25Aprile': 1476,
-  'Covid_19': 1119,
-  'COVID19': 1003,
-  'coronavirus': 825,
-  'AltaredellaPatria': 806,
-  'PideAlmayaDiyeÇıkıp': 777,
-  'Liberazione': 700}
+# Top 10 Tweets with most a composite score of Retweets*0.6 + Likes*0.4
+def get_top_tweets():
+    tweets = tweets_collec.find().sort([("Retweet_Count", -1), ("Likes_Count", -1)]).limit(10)
+    top_tweets = []
+    for tweet in tweets:
+        score = tweet['Retweet_Count'] * 0.6 + tweet['Likes_Count'] * 0.4
+        tweet['score'] = score
+        top_tweets.append(tweet)
+    top_tweets = sorted(top_tweets, key=lambda x: x['score'], reverse=True)
+    return top_tweets
 
-get_top_10_tweets= [{'created_at': '2020-04-25 09:23:42',
-   'Tweet_Id': '1253977978620518400',
-   'Text': '#25Aprile, il Presidente #Mattarella si è voluto recare all’#AltaredellaPatria dove ha deposto una corona d’alloro… https://t.co/ev4b4DlgDf',
-   'Hashtag': ['25Aprile', 'Mattarella', 'AltaredellaPatria'],
-   'User_Id': '732819391',
-   'User_Name': 'Quirinale',
-   'Retweet_Count': 798,
-   'Likes_Count': 9524,
-   'score': 4288.400000000001},
-  {'created_at': '2020-04-25 05:24:38',
-   'Tweet_Id': '1253917813791690752',
-   'Text': 'Ngomongin teori konspirasi corona sama orang yg percaya kalo bumi itu datar, I’m not a smart people, but please dud… https://t.co/aClWBZg41m',
-   'Hashtag': [],
-   'User_Id': '31079332',
-   'User_Name': 'dr. Shela Putri Sundawa',
-   'Retweet_Count': 784,
-   'Likes_Count': 5498,
-   'score': 2669.6000000000004},
-  {'created_at': '2020-04-25 09:56:54',
-   'Tweet_Id': '1253986335297359874',
-   'Text': '#25Aprile, nel 75° anniversario della #Liberazione il Presidente #Mattarella ha deposto una corona all’Altare della… https://t.co/vDcVcwEMQy',
-   'Hashtag': ['25Aprile', 'Liberazione', 'Mattarella'],
-   'User_Id': '732819391',
-   'User_Name': 'Quirinale',
-   'Retweet_Count': 654,
-   'Likes_Count': 4062,
-   'score': 2017.2000000000003},
-  {'created_at': '2020-04-25 11:27:12',
-   'Tweet_Id': '1254009056517332998',
-   'Text': 'And where is the evidence that Covid 19 is easily spread outdoors?  https://t.co/YPcJXU1uqw',
-   'Hashtag': [],
-   'User_Id': '112047805',
-   'User_Name': 'Brit Hume',
-   'Retweet_Count': 1474,
-   'Likes_Count': 1831,
-   'score': 1616.8000000000002},
-  {'created_at': '2020-04-25 11:26:44',
-   'Tweet_Id': '1254008941408915456',
-   'Text': 'Corona disinfecting in Russia. https://t.co/AEF5ccDmM3',
-   'Hashtag': [],
-   'User_Id': '2904195838',
-   'User_Name': '🇷🇺Only In Russia 🇷🇺',
-   'Retweet_Count': 586,
-   'Likes_Count': 1352,
-   'score': 892.4000000000001},
-  {'created_at': '2020-04-23 19:58:13',
-   'Tweet_Id': '1253412885444743177',
-   'Text': 'Quando eu ligo a televisão e  fica falando só de corona vírus',
-   'Hashtag': [],
-   'User_Id': '1251310476878852096',
-   'User_Name': '♠️į§ąč♣️',
-   'Retweet_Count': 445,
-   'Likes_Count': 1532,
-   'score': 879.8000000000001},
-  {'created_at': '2020-04-25 12:51:03',
-   'Tweet_Id': '1254030161403674624',
-   'Text': 'Milwaukee’s health commissioner has now tied 40 coronavirus infections to the April 7 election. \n\nhttps://t.co/fGIsLKzTkm',
-   'Hashtag': [],
-   'User_Id': '851211',
-   'User_Name': 'Ben Wikler',
-   'Source_tweet_Id': 0,
-   'Retweet_Count': 986,
-   'Likes_Count': 0,
-   'score': 591.6},
-  {'created_at': '2020-04-25 12:43:26',
-   'Tweet_Id': '1254028244166356998',
-   'Text': 'Gözün çıksın corona😷 Ülkece asabii olduk 🤷\u200d♀️muhtemel psikoloji ektedir 😂😂😂👇\n\n#PideAlmayaDiyeÇıkıp https://t.co/KoGSbVAMxZ',
-   'Hashtag': ['PideAlmayaDiyeÇıkıp'],
-   'User_Id': '1540461966',
-   'User_Name': 'Funda',
-   'Source_tweet_Id': 0,
-   'Retweet_Count': 732,
-   'Likes_Count': 0,
-   'score': 439.2},
-  {'created_at': '2020-04-25 13:53:37',
-   'Tweet_Id': '1254045905252167681',
-   'Text': 'A MUST READ...Coronavirus Restrictions: Government Bears the Burden of Proof Before Denying Freedoms | National Rev… https://t.co/RcaAK9nwDs',
-   'Hashtag': [],
-   'User_Id': '50769180',
-   'User_Name': 'Laura Ingraham',
-   'Source_tweet_Id': 0,
-   'Retweet_Count': 500,
-   'Likes_Count': 0,
-   'score': 300.0},
-  {'created_at': '2020-04-25 13:01:20',
-   'Tweet_Id': '1254032746361417729',
-   'Text': 'Thalapathy fans from Sivakasi Helped the Poor Family who are affected by this corona Crisis ! They have supplied th… https://t.co/ozoG6d9Ax8',
-   'Hashtag': [],
-   'User_Id': '751643287870636032',
-   'User_Name': 'Gu Ru Thalaiva',
-   'Source_tweet_Id': 0,
-   'Retweet_Count': 422,
-   'Likes_Count': 0,
-   'score': 253.2}]
+top_10_tweets= get_top_tweets()
 
+
+ # Top 10 users with most followers, tweets
+query = """select id,name,screen_name,verified,followers_count,friends_count,location,tweets_count,Description from mydatabase.users 
+ order by followers_count DESC,tweets_count DESC 
+ limit 10"""
+
+mycursor.execute(query)
+top_10_users = mycursor.fetchall()
 
 tweets_cache={}
 
@@ -445,11 +284,11 @@ def index():
 def top_10():
     if request.method == 'POST':
         if request.form['action'] == 'Trending Users':
-            return render_template('top_users.html',accounts=get_top_10_users)
+            return render_template('top_users.html',accounts=top_10_users)
         elif request.form['action'] == 'Trending Tweets':
-            return render_template('top_tweets.html', string_tweets=get_top_10_tweets)
+            return render_template('top_tweets.html', string_tweets=top_10_tweets)
         elif request.form['action'] == 'Trending Hashtags':
-            return render_template('top_hashtags.html', hashtag_info=get_top_10_hashtags)
+            return render_template('top_hashtags.html', hashtag_info=top_10_hash)
         else:
             message = ''
         
