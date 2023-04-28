@@ -6,6 +6,3 @@ The team members are:
 3) Rishik Salver
 4) Rohit Macherla
 
-# Dataset
-The Datasets can be found at the below mentioned drive link.
-https://drive.google.com/drive/folders/1jPO3bix-6sWngxRfq4v9yXP_IzHTKhEM?usp=share_link
